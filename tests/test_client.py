@@ -1,8 +1,5 @@
 """Tests for FaceVaultClient and AsyncFaceVaultClient."""
 
-import json
-
-import httpx
 import pytest
 import respx
 

@@ -31,7 +31,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://facevault.id"
-Documentation = "https://facevault.id/docs"
+Documentation = "https://gitlab.com/khreechari/facevault-python#readme"
 Repository = "https://gitlab.com/khreechari/facevault-python"
 
 [tool.pytest.ini_options]

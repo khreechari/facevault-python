@@ -16,7 +16,7 @@ User flow:
 import logging
 import os
 
-from aiogram import Bot, Dispatcher, F
+from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
 from aiogram.types import (
     InlineKeyboardButton,

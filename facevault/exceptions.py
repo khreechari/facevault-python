@@ -1,5 +1,7 @@
 """FaceVault SDK exceptions."""
 
+from __future__ import annotations
+
 
 class FaceVaultError(Exception):
     """Base exception for FaceVault API errors."""
