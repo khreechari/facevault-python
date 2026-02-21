@@ -1,6 +1,19 @@
 # FaceVault Python SDK
 
-Python client for the [FaceVault](https://facevault.id) identity verification API. Supports sync and async usage, webhook verification, and typed models.
+[![PyPI version](https://img.shields.io/pypi/v/facevault)](https://pypi.org/project/facevault/)
+[![Python versions](https://img.shields.io/pypi/pyversions/facevault)](https://pypi.org/project/facevault/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-40%20passed-brightgreen)]()
+
+Python client for the [FaceVault](https://facevault.id) identity verification API — privacy-first KYC with liveness detection, face matching, and document verification.
+
+## Features
+
+- **Sync & async clients** — use `FaceVaultClient` or `AsyncFaceVaultClient`
+- **Webhook verification** — HMAC-SHA256 signature validation
+- **Typed models** — dataclasses for sessions, status, and webhook events
+- **Secure by default** — HTTPS enforced, API keys validated, secrets redacted from logs
+- **Lightweight** — only depends on [httpx](https://www.python-httpx.org/)
 
 ## Installation
 
@@ -50,7 +63,7 @@ signature = request.headers["X-Signature"]
 
 if verify_signature(body, signature, secret="your_webhook_secret"):
     event = parse_event(body)
-    print(event.event)            # "session.completed"
+    print(event.event)             # "session.completed"
     print(event.session_id)
     print(event.face_match_passed)
 ```
@@ -72,10 +85,20 @@ except RateLimitError:
     print("Too many requests")
 ```
 
+## Security
+
+The SDK enforces security best practices out of the box:
+
+- **HTTPS only** — `http://` URLs are rejected at init to prevent credentials leaking over plaintext
+- **Key validation** — empty or whitespace-only API keys raise `ValueError` immediately
+- **Secret redaction** — `Session.__repr__` masks `session_token` and URL tokens, safe for logging
+
 ## Documentation
 
-Full API docs at [facevault.id/docs](https://facevault.id/docs).
+- [Getting started guide](https://facevault.id/docs)
+- [API reference](https://facevault.id/docs)
+- [Blog: Announcing the Python SDK](https://facevault.id/blog/python-sdk)
 
 ## License
 
-MIT
+[MIT](LICENSE)
