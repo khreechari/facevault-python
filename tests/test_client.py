@@ -148,3 +148,34 @@ def test_custom_webapp_base():
     session = client.create_session("user-1")
     assert session.webapp_url.startswith("https://myapp.example.com/")
     client.close()
+
+
+# ── Security: HTTPS enforcement ─────────────────────────────
+
+def test_http_base_url_rejected():
+    with pytest.raises(ValueError, match="HTTPS"):
+        FaceVaultClient("fv_live_test", base_url="http://evil.example.com")
+
+
+def test_http_webapp_base_rejected():
+    with pytest.raises(ValueError, match="HTTPS"):
+        FaceVaultClient("fv_live_test", webapp_base="http://evil.example.com")
+
+
+def test_trailing_slash_stripped():
+    """HTTPS URLs with trailing slashes should be accepted and cleaned."""
+    client = FaceVaultClient("fv_live_test", base_url="https://api.facevault.id/")
+    assert client._base_url == "https://api.facevault.id"
+    client.close()
+
+
+# ── Security: API key validation ─────────────────────────────
+
+def test_empty_api_key_rejected():
+    with pytest.raises(ValueError, match="non-empty"):
+        FaceVaultClient("")
+
+
+def test_whitespace_api_key_rejected():
+    with pytest.raises(ValueError, match="non-empty"):
+        FaceVaultClient("   ")

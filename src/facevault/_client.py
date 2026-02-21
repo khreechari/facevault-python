@@ -12,14 +12,32 @@ _DEFAULT_BASE_URL = "https://api.facevault.id"
 _DEFAULT_WEBAPP_BASE = "https://app.facevault.id"
 
 
+def _validate_url(url: str, label: str) -> str:
+    """Validate a URL uses HTTPS. Returns the cleaned URL."""
+    url = url.rstrip("/")
+    if not url.startswith("https://"):
+        raise ValueError(
+            f"{label} must use HTTPS (got {url!r}). "
+            "This prevents API keys and session tokens from leaking over plaintext."
+        )
+    return url
+
+
+def _validate_api_key(api_key: str) -> None:
+    """Validate the API key is non-empty."""
+    if not api_key or not api_key.strip():
+        raise ValueError("api_key must be a non-empty string")
+
+
 class FaceVaultClient:
     """Synchronous client for the FaceVault verification API.
 
     Args:
         api_key: Your FaceVault API key (``fv_live_...`` or ``fv_test_...``).
         base_url: API base URL. Defaults to ``https://api.facevault.id``.
+            Must use HTTPS.
         webapp_base: Webapp base URL for constructing ``webapp_url``.
-            Defaults to ``https://app.facevault.id``.
+            Defaults to ``https://app.facevault.id``. Must use HTTPS.
         timeout: Request timeout in seconds. Defaults to 15.
     """
 
@@ -31,9 +49,10 @@ class FaceVaultClient:
         webapp_base: str = _DEFAULT_WEBAPP_BASE,
         timeout: float = 15,
     ):
+        _validate_api_key(api_key)
         self._api_key = api_key
-        self._base_url = base_url.rstrip("/")
-        self._webapp_base = webapp_base.rstrip("/")
+        self._base_url = _validate_url(base_url, "base_url")
+        self._webapp_base = _validate_url(webapp_base, "webapp_base")
         self._client = httpx.Client(
             base_url=self._base_url,
             headers={"X-FaceVault-Api-Key": api_key},

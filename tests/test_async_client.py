@@ -108,3 +108,27 @@ async def test_async_context_manager():
     async with AsyncFaceVaultClient("fv_live_test") as client:
         session = await client.create_session("user-1")
         assert session.session_id == "sess_ctx"
+
+
+# ── Security: HTTPS enforcement ─────────────────────────────
+
+def test_async_http_base_url_rejected():
+    with pytest.raises(ValueError, match="HTTPS"):
+        AsyncFaceVaultClient("fv_live_test", base_url="http://evil.example.com")
+
+
+def test_async_http_webapp_base_rejected():
+    with pytest.raises(ValueError, match="HTTPS"):
+        AsyncFaceVaultClient("fv_live_test", webapp_base="http://evil.example.com")
+
+
+# ── Security: API key validation ─────────────────────────────
+
+def test_async_empty_api_key_rejected():
+    with pytest.raises(ValueError, match="non-empty"):
+        AsyncFaceVaultClient("")
+
+
+def test_async_whitespace_api_key_rejected():
+    with pytest.raises(ValueError, match="non-empty"):
+        AsyncFaceVaultClient("   ")

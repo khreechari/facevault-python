@@ -16,6 +16,20 @@ def test_session_creation():
     assert "sid=sess_1" in session.webapp_url
 
 
+def test_session_repr_redacts_token():
+    """Session.__repr__ must never leak the session_token or full webapp_url."""
+    session = Session(
+        session_id="sess_1",
+        session_token="tok_secret_abc",
+        steps=["liveness"],
+        webapp_url="https://app.facevault.id/?sid=sess_1&st=tok_secret_abc",
+    )
+    r = repr(session)
+    assert "tok_secret_abc" not in r
+    assert "***" in r
+    assert "sess_1" in r
+
+
 def test_session_status_defaults():
     status = SessionStatus(
         session_id="sess_1",

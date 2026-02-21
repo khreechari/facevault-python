@@ -15,6 +15,14 @@ class Session:
     steps: list[str]
     webapp_url: str
 
+    def __repr__(self) -> str:
+        return (
+            f"Session(session_id={self.session_id!r}, "
+            f"session_token='***', "
+            f"steps={self.steps!r}, "
+            f"webapp_url='{self.webapp_url.split('st=')[0]}st=***')"
+        )
+
 
 @dataclass
 class SessionStatus:

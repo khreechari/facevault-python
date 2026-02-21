@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import httpx
 
+from ._client import _validate_api_key, _validate_url
 from .exceptions import AuthError, FaceVaultError, NotFoundError, RateLimitError
 from .models import Session, SessionStatus
 
@@ -21,8 +22,9 @@ class AsyncFaceVaultClient:
     Args:
         api_key: Your FaceVault API key (``fv_live_...`` or ``fv_test_...``).
         base_url: API base URL. Defaults to ``https://api.facevault.id``.
+            Must use HTTPS.
         webapp_base: Webapp base URL for constructing ``webapp_url``.
-            Defaults to ``https://app.facevault.id``.
+            Defaults to ``https://app.facevault.id``. Must use HTTPS.
         timeout: Request timeout in seconds. Defaults to 15.
     """
 
@@ -34,9 +36,10 @@ class AsyncFaceVaultClient:
         webapp_base: str = _DEFAULT_WEBAPP_BASE,
         timeout: float = 15,
     ):
+        _validate_api_key(api_key)
         self._api_key = api_key
-        self._base_url = base_url.rstrip("/")
-        self._webapp_base = webapp_base.rstrip("/")
+        self._base_url = _validate_url(base_url, "base_url")
+        self._webapp_base = _validate_url(webapp_base, "webapp_base")
         self._client = httpx.AsyncClient(
             base_url=self._base_url,
             headers={"X-FaceVault-Api-Key": api_key},
