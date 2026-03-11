@@ -14,6 +14,7 @@ class Session:
     session_token: str
     steps: list[str]
     webapp_url: str
+    challenge_nonce: str | None = None
 
     def __repr__(self) -> str:
         return (
@@ -35,6 +36,12 @@ class SessionStatus:
     error: str = ""
     created_at: datetime | None = None
     completed_at: datetime | None = None
+    trust_score: float | None = None
+    trust_decision: str | None = None
+    require_poa: bool = False
+    poa: dict | None = None
+    anti_spoofing: dict | None = None
+    credential: dict | None = None
 
 
 @dataclass
@@ -52,3 +59,7 @@ class WebhookEvent:
     confirmed_data: dict | None = None
     completed_at: str | None = None
     document_check: dict | None = None
+    trust_score: float | None = None
+    trust_decision: str | None = None
+    sanctions_hit: bool | None = None
+    poa: dict | None = None

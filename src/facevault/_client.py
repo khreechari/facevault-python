@@ -82,18 +82,22 @@ class FaceVaultClient:
         else:
             raise FaceVaultError(msg, status_code=response.status_code)
 
-    def create_session(self, external_user_id: str) -> Session:
+    def create_session(self, external_user_id: str, *, require_poa: bool | None = None) -> Session:
         """Create a new verification session.
 
         Args:
             external_user_id: Your user identifier (e.g. Telegram chat ID).
+            require_poa: If True, require proof-of-address during verification.
 
         Returns:
             Session with ``session_id``, ``session_token``, and ``webapp_url``.
         """
+        params = {"external_user_id": external_user_id}
+        if require_poa is not None:
+            params["require_poa"] = str(require_poa).lower()
         response = self._client.post(
             "/api/v1/sessions",
-            params={"external_user_id": external_user_id},
+            params=params,
         )
         self._raise_for_status(response)
         data = response.json()
@@ -106,6 +110,7 @@ class FaceVaultClient:
             session_token=session_token,
             steps=data.get("steps", []),
             webapp_url=f"{self._webapp_base}/?sid={session_id}&st={session_token}",
+            challenge_nonce=data.get("challenge_nonce"),
         )
 
     def get_session(self, session_id: str) -> SessionStatus:
@@ -129,6 +134,12 @@ class FaceVaultClient:
             error=data.get("error", ""),
             created_at=data.get("created_at"),
             completed_at=data.get("completed_at"),
+            trust_score=data.get("trust_score"),
+            trust_decision=data.get("trust_decision"),
+            require_poa=data.get("require_poa", False),
+            poa=data.get("poa"),
+            anti_spoofing=data.get("anti_spoofing"),
+            credential=data.get("credential"),
         )
 
     def close(self) -> None:

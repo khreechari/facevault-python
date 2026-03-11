@@ -89,6 +89,10 @@ def test_parse_event_full():
         "confirmed_data": {"full_name": "John Doe"},
         "completed_at": "2026-01-01T00:00:00Z",
         "document_check": {"mrz_valid": True},
+        "trust_score": 85.0,
+        "trust_decision": "accept",
+        "sanctions_hit": False,
+        "poa": {"status": "verified"},
     })
     event = parse_event(body)
 
@@ -100,6 +104,10 @@ def test_parse_event_full():
     assert event.confirmed_data == {"full_name": "John Doe"}
     assert event.completed_at == "2026-01-01T00:00:00Z"
     assert event.document_check == {"mrz_valid": True}
+    assert event.trust_score == 85.0
+    assert event.trust_decision == "accept"
+    assert event.sanctions_hit is False
+    assert event.poa == {"status": "verified"}
 
 
 def test_parse_event_bytes():

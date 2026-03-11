@@ -18,6 +18,7 @@ async def test_create_session():
             "session_id": "sess_async",
             "session_token": "tok_async",
             "steps": ["liveness"],
+            "challenge_nonce": "nonce_async",
         })
     )
 
@@ -28,6 +29,27 @@ async def test_create_session():
     assert session.session_token == "tok_async"
     assert session.steps == ["liveness"]
     assert "sid=sess_async" in session.webapp_url
+    assert session.challenge_nonce == "nonce_async"
+    await client.close()
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_create_session_with_require_poa():
+    route = respx.post(f"{BASE_URL}/api/v1/sessions").mock(
+        return_value=httpx.Response(200, json={
+            "session_id": "sess_poa",
+            "session_token": "tok_poa",
+            "steps": ["liveness", "poa"],
+        })
+    )
+
+    client = AsyncFaceVaultClient("fv_live_test")
+    session = await client.create_session("user-42", require_poa=True)
+
+    assert session.session_id == "sess_poa"
+    request = route.calls[0].request
+    assert "require_poa=true" in str(request.url)
     await client.close()
 
 
@@ -43,6 +65,12 @@ async def test_get_session():
             "error": "",
             "created_at": None,
             "completed_at": None,
+            "trust_score": 72.0,
+            "trust_decision": "accept",
+            "require_poa": True,
+            "poa": {"status": "verified"},
+            "anti_spoofing": {"score": 0.88},
+            "credential": {"credential_id": "cred_async"},
         })
     )
 
@@ -52,6 +80,12 @@ async def test_get_session():
     assert status.session_id == "sess_async"
     assert status.status == "completed"
     assert status.face_match_passed is True
+    assert status.trust_score == 72.0
+    assert status.trust_decision == "accept"
+    assert status.require_poa is True
+    assert status.poa == {"status": "verified"}
+    assert status.anti_spoofing == {"score": 0.88}
+    assert status.credential == {"credential_id": "cred_async"}
     await client.close()
 
 

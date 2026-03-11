@@ -17,6 +17,7 @@ def test_create_session():
             "session_id": "sess_123",
             "session_token": "tok_abc",
             "steps": ["liveness", "document"],
+            "challenge_nonce": "nonce_xyz",
         })
     )
 
@@ -28,6 +29,44 @@ def test_create_session():
     assert session.steps == ["liveness", "document"]
     assert "sid=sess_123" in session.webapp_url
     assert "st=tok_abc" in session.webapp_url
+    assert session.challenge_nonce == "nonce_xyz"
+    client.close()
+
+
+@respx.mock
+def test_create_session_no_challenge_nonce():
+    respx.post(f"{BASE_URL}/api/v1/sessions").mock(
+        return_value=httpx.Response(200, json={
+            "session_id": "sess_123",
+            "session_token": "tok_abc",
+            "steps": ["liveness"],
+        })
+    )
+
+    client = FaceVaultClient("fv_live_test")
+    session = client.create_session("user-42")
+
+    assert session.challenge_nonce is None
+    client.close()
+
+
+@respx.mock
+def test_create_session_with_require_poa():
+    route = respx.post(f"{BASE_URL}/api/v1/sessions").mock(
+        return_value=httpx.Response(200, json={
+            "session_id": "sess_poa",
+            "session_token": "tok_poa",
+            "steps": ["liveness", "document", "poa"],
+        })
+    )
+
+    client = FaceVaultClient("fv_live_test")
+    session = client.create_session("user-42", require_poa=True)
+
+    assert session.session_id == "sess_poa"
+    # Verify require_poa was sent as query param
+    request = route.calls[0].request
+    assert "require_poa=true" in str(request.url)
     client.close()
 
 
@@ -42,6 +81,12 @@ def test_get_session():
             "error": "",
             "created_at": "2026-01-01T00:00:00Z",
             "completed_at": "2026-01-01T00:05:00Z",
+            "trust_score": 85.0,
+            "trust_decision": "accept",
+            "require_poa": False,
+            "poa": None,
+            "anti_spoofing": {"score": 0.92, "passed": True},
+            "credential": {"credential_id": "cred_1"},
         })
     )
 
@@ -52,6 +97,35 @@ def test_get_session():
     assert status.status == "completed"
     assert status.face_match_passed is True
     assert status.steps == {"liveness": True, "document": True}
+    assert status.trust_score == 85.0
+    assert status.trust_decision == "accept"
+    assert status.require_poa is False
+    assert status.poa is None
+    assert status.anti_spoofing == {"score": 0.92, "passed": True}
+    assert status.credential == {"credential_id": "cred_1"}
+    client.close()
+
+
+@respx.mock
+def test_get_session_minimal_response():
+    """API responses without new fields should use defaults."""
+    respx.get(f"{BASE_URL}/api/v1/sessions/sess_old").mock(
+        return_value=httpx.Response(200, json={
+            "session_id": "sess_old",
+            "status": "pending",
+            "steps": {},
+        })
+    )
+
+    client = FaceVaultClient("fv_live_test")
+    status = client.get_session("sess_old")
+
+    assert status.trust_score is None
+    assert status.trust_decision is None
+    assert status.require_poa is False
+    assert status.poa is None
+    assert status.anti_spoofing is None
+    assert status.credential is None
     client.close()
 
 

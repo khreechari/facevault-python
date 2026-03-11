@@ -78,4 +78,8 @@ def parse_event(body: str | bytes) -> WebhookEvent:
         confirmed_data=data.get("confirmed_data"),
         completed_at=data.get("completed_at"),
         document_check=data.get("document_check"),
+        trust_score=data.get("trust_score"),
+        trust_decision=data.get("trust_decision"),
+        sanctions_hit=data.get("sanctions_hit"),
+        poa=data.get("poa"),
     )
