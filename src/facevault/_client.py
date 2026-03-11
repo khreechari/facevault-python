@@ -122,6 +122,8 @@ class FaceVaultClient:
         Returns:
             SessionStatus with current state and results.
         """
+        if not session_id or "/" in session_id or ".." in session_id:
+            raise ValueError("Invalid session_id")
         response = self._client.get(f"/api/v1/sessions/{session_id}")
         self._raise_for_status(response)
         data = response.json()
@@ -145,6 +147,9 @@ class FaceVaultClient:
     def close(self) -> None:
         """Close the underlying HTTP client."""
         self._client.close()
+
+    def __repr__(self) -> str:
+        return f"FaceVaultClient(base_url={self._base_url!r}, api_key='***')"
 
     def __enter__(self) -> FaceVaultClient:
         return self

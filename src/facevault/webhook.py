@@ -28,6 +28,9 @@ def verify_signature(body: str | bytes, signature: str, secret: str) -> bool:
     Returns:
         True if the signature is valid.
     """
+    if not isinstance(signature, str) or not signature:
+        return False
+
     if isinstance(body, str):
         body_bytes = body.encode()
     else:

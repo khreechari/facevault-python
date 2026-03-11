@@ -108,6 +108,8 @@ class AsyncFaceVaultClient:
         Returns:
             SessionStatus with current state and results.
         """
+        if not session_id or "/" in session_id or ".." in session_id:
+            raise ValueError("Invalid session_id")
         response = await self._client.get(f"/api/v1/sessions/{session_id}")
         self._raise_for_status(response)
         data = response.json()
@@ -131,6 +133,9 @@ class AsyncFaceVaultClient:
     async def close(self) -> None:
         """Close the underlying HTTP client."""
         await self._client.aclose()
+
+    def __repr__(self) -> str:
+        return f"AsyncFaceVaultClient(base_url={self._base_url!r}, api_key='***')"
 
     async def __aenter__(self) -> AsyncFaceVaultClient:
         return self
