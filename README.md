@@ -3,7 +3,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/facevault)](https://pypi.org/project/facevault/)
 [![Python versions](https://img.shields.io/pypi/pyversions/facevault)](https://pypi.org/project/facevault/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-40%20passed-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-46%20passed-brightgreen)]()
 
 Python client for the [FaceVault](https://facevault.id) identity verification API — privacy-first KYC with liveness detection, face matching, and document verification.
 
@@ -34,9 +34,14 @@ client = FaceVaultClient("fv_live_your_api_key")
 session = client.create_session(external_user_id="user-123")
 print(session.webapp_url)  # Send this URL to your user
 
+# With proof of address required
+session = client.create_session(external_user_id="user-123", require_poa=True)
+
 # Check session status
 status = client.get_session(session.session_id)
-print(status.status)  # "pending", "completed", "failed"
+print(status.status)           # "in_progress", "passed", "failed", "review"
+print(status.trust_score)      # 0-100 trust score
+print(status.trust_decision)   # "accept", "review", "reject"
 
 client.close()
 ```
@@ -63,9 +68,12 @@ signature = request.headers["X-Signature"]
 
 if verify_signature(body, signature, secret="your_webhook_secret"):
     event = parse_event(body)
-    print(event.event)             # "session.completed"
+    print(event.event)             # "verification.completed"
     print(event.session_id)
     print(event.face_match_passed)
+    print(event.trust_score)       # 0-100
+    print(event.trust_decision)    # "accept", "review", "reject"
+    print(event.sanctions_hit)     # True/False
 ```
 
 ## Error handling
@@ -92,6 +100,16 @@ The SDK enforces security best practices out of the box:
 - **HTTPS only** — `http://` URLs are rejected at init to prevent credentials leaking over plaintext
 - **Key validation** — empty or whitespace-only API keys raise `ValueError` immediately
 - **Secret redaction** — `Session.__repr__` masks `session_token` and URL tokens, safe for logging
+- **Client redaction** — `FaceVaultClient.__repr__` masks the API key
+- **Path traversal protection** — `get_session()` validates session IDs
+
+## What's new in 1.0.0
+
+- `require_poa` parameter on `create_session()` — per-session proof of address override
+- `trust_score` and `trust_decision` on `SessionStatus` — unified 0-100 trust score
+- `require_poa`, `poa`, `anti_spoofing`, `credential` on `SessionStatus`
+- `trust_score`, `trust_decision`, `sanctions_hit`, `poa` on `WebhookEvent`
+- `challenge_nonce` on `Session` — capture integrity nonce
 
 ## Documentation
 
