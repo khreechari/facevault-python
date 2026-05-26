@@ -64,7 +64,7 @@ from facevault import verify_signature, parse_event
 
 # Verify the webhook signature
 body = request.body
-signature = request.headers["X-Signature"]
+signature = request.headers["X-FaceVault-Signature"]
 
 if verify_signature(body, signature, secret="your_webhook_secret"):
     event = parse_event(body)

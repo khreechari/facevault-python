@@ -22,7 +22,7 @@ def verify_signature(body: str | bytes, signature: str, secret: str) -> bool:
 
     Args:
         body: Raw request body (str or bytes).
-        signature: Value of the ``X-Signature`` header.
+        signature: Value of the ``X-FaceVault-Signature`` header.
         secret: Your webhook secret (from API dashboard).
 
     Returns:
