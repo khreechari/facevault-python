@@ -118,12 +118,19 @@ The SDK enforces security best practices out of the box:
 - [API reference](https://facevault.id/docs)
 - [Blog: Announcing the Python SDK](https://facevault.id/blog/python-sdk)
 
+## Roadmap
+
+The FaceVault platform also offers **reusable identity credentials** ("verify
+once, prove forever" — credential challenge / verify / renew / status). These
+endpoints aren't wrapped by this SDK yet; they're planned for a future release.
+Until then, call them directly via the REST API.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). One topic per PR; update
 `CHANGELOG.md` under `## [Unreleased]`.
 
-## Security
+## Reporting a vulnerability
 
 Please do not open public issues for security vulnerabilities. See
 [SECURITY.md](SECURITY.md) or email **security@facevault.id**.
