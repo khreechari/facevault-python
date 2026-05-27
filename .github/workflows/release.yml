@@ -6,7 +6,8 @@ on:
       - 'v*'
 
 permissions:
-  contents: write
+  contents: write   # create the GitHub release
+  id-token: write   # PyPI trusted publishing (OIDC)
 
 jobs:
   release:
@@ -20,11 +21,11 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install dependencies and run tests
+      - name: Install dependencies and run tests (with coverage gate)
         run: |
           python -m pip install --upgrade pip
-          pip install build pytest pytest-asyncio respx -e .
-          pytest -q
+          pip install build pytest pytest-asyncio respx pytest-cov -e .
+          pytest -q --cov=facevault --cov-report=term-missing
 
       - name: Build distribution
         run: python -m build
@@ -58,3 +59,11 @@ jobs:
             SHA256SUMS.txt
           fail_on_unmatched_files: true
           body_path: release-body.md
+
+      # Publish to PyPI via Trusted Publishing (OIDC — no stored token). Runs
+      # last so a missing trusted-publisher config fails only this step; the
+      # GitHub release + assets are already up. One-time setup: add this repo +
+      # workflow as a Trusted Publisher under the PyPI project's Publishing
+      # settings (https://docs.pypi.org/trusted-publishers/).
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b  # release/v1

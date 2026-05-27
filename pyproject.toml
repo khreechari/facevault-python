@@ -35,3 +35,10 @@ packages = ["src/facevault"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["facevault"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 90
