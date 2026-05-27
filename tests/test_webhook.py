@@ -9,60 +9,48 @@ import pytest
 from facevault import verify_signature, parse_event
 
 
-def _make_signature(payload: dict, secret: str) -> str:
-    """Generate a valid HMAC-SHA256 signature for a payload."""
-    canonical = json.dumps(payload, separators=(",", ":"), sort_keys=True).encode()
-    return hmac.new(secret.encode(), canonical, hashlib.sha256).hexdigest()
+def _sign(body: str | bytes, secret: str) -> str:
+    """Sign the raw body bytes exactly as the server does."""
+    body_bytes = body.encode() if isinstance(body, str) else body
+    return hmac.new(secret.encode(), body_bytes, hashlib.sha256).hexdigest()
 
 
 def test_verify_valid_signature():
-    payload = {"event": "session.completed", "session_id": "sess_1", "status": "completed"}
     secret = "whsec_test123"
-    sig = _make_signature(payload, secret)
-    body = json.dumps(payload)
-
-    assert verify_signature(body, sig, secret) is True
+    body = '{"event":"session.completed","session_id":"sess_1","status":"completed"}'
+    assert verify_signature(body, _sign(body, secret), secret) is True
 
 
 def test_verify_valid_signature_bytes():
-    payload = {"event": "session.completed", "session_id": "sess_1"}
     secret = "whsec_test123"
-    sig = _make_signature(payload, secret)
-    body = json.dumps(payload).encode()
-
-    assert verify_signature(body, sig, secret) is True
+    body = b'{"event":"session.completed","session_id":"sess_1"}'
+    assert verify_signature(body, _sign(body, secret), secret) is True
 
 
 def test_verify_invalid_signature():
-    payload = {"event": "session.completed", "session_id": "sess_1"}
-    secret = "whsec_test123"
-    body = json.dumps(payload)
-
-    assert verify_signature(body, "invalid_sig", secret) is False
+    body = '{"event":"session.completed","session_id":"sess_1"}'
+    assert verify_signature(body, "invalid_sig", "whsec_test123") is False
 
 
 def test_verify_wrong_secret():
-    payload = {"event": "session.completed", "session_id": "sess_1"}
-    sig = _make_signature(payload, "correct_secret")
-    body = json.dumps(payload)
-
-    assert verify_signature(body, sig, "wrong_secret") is False
+    body = '{"event":"session.completed","session_id":"sess_1"}'
+    assert verify_signature(body, _sign(body, "correct_secret"), "wrong_secret") is False
 
 
-def test_verify_invalid_json():
-    assert verify_signature("not json", "some_sig", "secret") is False
-
-
-def test_verify_reordered_keys():
-    """Signature should match regardless of key order in body."""
-    payload = {"session_id": "sess_1", "event": "session.completed", "status": "completed"}
+def test_verify_tampered_body():
+    """A single extra byte must invalidate the signature (raw-byte verification)."""
     secret = "whsec_test123"
-    sig = _make_signature(payload, secret)
+    body = '{"event":"session.completed","status":"passed"}'
+    sig = _sign(body, secret)
+    assert verify_signature(body + " ", sig, secret) is False
 
-    # Send body with different key ordering
-    reordered = json.dumps({"status": "completed", "event": "session.completed", "session_id": "sess_1"})
 
-    assert verify_signature(reordered, sig, secret) is True
+def test_verify_non_ascii_raw_body():
+    """Server signs raw bytes with ensure_ascii=True; verify must HMAC them as-is."""
+    secret = "whsec_test123"
+    # Exactly what the server sends: non-ASCII \uXXXX-escaped, float keeps .0
+    body = '{"confirmed_data":{"name":"Jos\\u00e9 M\\u00fcller"},"event":"verification.completed","status":"passed","trust_score":1.0}'
+    assert verify_signature(body, _sign(body, secret), secret) is True
 
 
 def test_parse_event_minimal():

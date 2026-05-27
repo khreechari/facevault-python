@@ -15,15 +15,19 @@ from .models import WebhookEvent
 
 
 def verify_signature(body: str | bytes, signature: str, secret: str) -> bool:
-    """Verify HMAC-SHA256 signature of a webhook payload.
+    """Verify the HMAC-SHA256 signature of a webhook.
 
-    The server computes:
-        hmac.new(secret, json.dumps(payload, separators=(",",":"), sort_keys=True), sha256).hexdigest()
+    The server signs the exact bytes it sends, so verification HMACs the **raw
+    request body** as received — do not parse and re-serialize it first.
+    Re-serializing can change the bytes (e.g. non-ASCII escaping or number
+    formatting) and would reject valid webhooks.
+
+        sig = hmac.new(secret, raw_body, sha256).hexdigest()  # matches X-FaceVault-Signature
 
     Args:
-        body: Raw request body (str or bytes).
+        body: Raw request body, exactly as received (str or bytes).
         signature: Value of the ``X-FaceVault-Signature`` header.
-        secret: Your webhook secret (from API dashboard).
+        secret: Your webhook secret (from the API dashboard).
 
     Returns:
         True if the signature is valid.
@@ -31,24 +35,8 @@ def verify_signature(body: str | bytes, signature: str, secret: str) -> bool:
     if not isinstance(signature, str) or not signature:
         return False
 
-    if isinstance(body, str):
-        body_bytes = body.encode()
-    else:
-        body_bytes = body
-
-    # Re-serialize to match the server's canonical form
-    try:
-        parsed = json.loads(body_bytes)
-        canonical = json.dumps(parsed, separators=(",", ":"), sort_keys=True).encode()
-    except (json.JSONDecodeError, TypeError):
-        return False
-
-    expected = hmac.new(
-        secret.encode(),
-        canonical,
-        hashlib.sha256,
-    ).hexdigest()
-
+    body_bytes = body.encode() if isinstance(body, str) else body
+    expected = hmac.new(secret.encode(), body_bytes, hashlib.sha256).hexdigest()
     return hmac.compare_digest(expected, signature)
 
 
