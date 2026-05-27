@@ -1,0 +1,60 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      # All third-party actions are SHA-pinned per supply-chain best practice;
+      # the comment records the human-readable version next to each SHA.
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies and run tests
+        run: |
+          python -m pip install --upgrade pip
+          pip install build pytest pytest-asyncio respx -e .
+          pytest -q
+
+      - name: Build distribution
+        run: python -m build
+
+      - name: SHA256 checksums
+        run: |
+          sha256sum dist/* > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      # Publish the [X.Y.Z] CHANGELOG section as the release body so the
+      # public release page mirrors the in-repo changelog.
+      - name: Extract changelog for this tag
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/}"
+          VERSION="${VERSION#v}"
+          awk -v ver="$VERSION" '
+            $0 ~ "^## \\[" ver "\\]" { capture=1; next }
+            capture && /^## \[/ { exit }
+            capture { print }
+          ' CHANGELOG.md > release-body.md
+          echo "Body length: $(wc -c < release-body.md)"
+          if [ ! -s release-body.md ]; then
+            echo "WARNING: no CHANGELOG section found for $VERSION" >&2
+          fi
+
+      - name: Publish release assets
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65  # v2.6.2
+        with:
+          files: |
+            dist/*
+            SHA256SUMS.txt
+          fail_on_unmatched_files: true
+          body_path: release-body.md

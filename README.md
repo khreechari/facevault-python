@@ -4,6 +4,7 @@
 [![Python versions](https://img.shields.io/pypi/pyversions/facevault)](https://pypi.org/project/facevault/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-46%20passed-brightgreen)]()
+[![CI](https://github.com/khreechari/facevault-python/actions/workflows/ci.yml/badge.svg)](https://github.com/khreechari/facevault-python/actions/workflows/ci.yml)
 
 Python client for the [FaceVault](https://facevault.id) identity verification API — privacy-first KYC with liveness detection, face matching, and document verification.
 
@@ -117,6 +118,20 @@ The SDK enforces security best practices out of the box:
 - [API reference](https://facevault.id/docs)
 - [Blog: Announcing the Python SDK](https://facevault.id/blog/python-sdk)
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). One topic per PR; update
+`CHANGELOG.md` under `## [Unreleased]`.
+
+## Security
+
+Please do not open public issues for security vulnerabilities. See
+[SECURITY.md](SECURITY.md) or email **security@facevault.id**.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
+
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE) — © Kaditham Holdings Pte Ltd

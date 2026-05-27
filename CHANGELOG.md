@@ -1,0 +1,33 @@
+# Changelog
+
+All notable changes to `facevault` (Python SDK).
+
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [1.0.0] - 2026-03-11
+
+### Added
+
+- Sync client (`FaceVaultClient`) and async client (`AsyncFaceVaultClient`)
+  backed by [httpx](https://www.python-httpx.org/); single runtime dependency.
+- `create_session()` — create a KYC verification session; returns a `Session`
+  with `webapp_url` to forward to the end user.
+- `get_session()` — poll session status; returns a `SessionStatus` with
+  `status`, `trust_score` (0–100), and `trust_decision`
+  (`accept` / `review` / `reject`).
+- Webhook HMAC helpers: `verify_signature` (HMAC-SHA256 constant-time check
+  against the `X-FaceVault-Signature` header) and `parse_event` (deserialise
+  the payload into a typed `WebhookEvent`).
+- Typed dataclass models: `Session`, `SessionStatus`, `WebhookEvent`.
+- Typed exceptions: `AuthError`, `NotFoundError`, `RateLimitError`,
+  `FaceVaultError`.
+- README with quick-start examples, webhook verification guide, and error
+  handling reference.
+- Project docs: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`.
+- CI (`ci.yml`) running on every push and pull request across Python 3.9–3.12.
+  Release workflow (`release.yml`) that, on tag push, builds the distribution,
+  publishes `dist/*` + `SHA256SUMS.txt` as release assets, and uses the
+  matching CHANGELOG section as the release body.
