@@ -104,13 +104,20 @@ The SDK enforces security best practices out of the box:
 - **Client redaction** — `FaceVaultClient.__repr__` masks the API key
 - **Path traversal protection** — `get_session()` validates session IDs
 
-## What's new in 1.0.0
+## What's new in 1.0.1
 
-- `require_poa` parameter on `create_session()` — per-session proof of address override
-- `trust_score` and `trust_decision` on `SessionStatus` — unified 0-100 trust score
-- `require_poa`, `poa`, `anti_spoofing`, `credential` on `SessionStatus`
-- `trust_score`, `trust_decision`, `sanctions_hit`, `poa` on `WebhookEvent`
-- `challenge_nonce` on `Session` — capture integrity nonce
+- **Webhook signature verification now HMACs the raw request body** instead
+  of re-serializing the parsed JSON. The old approach couldn't reproduce
+  the server's exact signed bytes for payloads containing non-ASCII
+  characters (names, addresses) or whole-number floats, so valid webhooks
+  could be silently rejected. Verification is now byte-exact — pass the
+  body exactly as received.
+- README + examples now document the webhook header as
+  `X-FaceVault-Signature` (the API has always sent this; v1.0.0 docs
+  incorrectly showed `X-Signature`).
+- Reusable identity credentials (`/credentials/*`) are noted in the
+  Roadmap section — these are planned for the v2 SDK line alongside
+  FacePass / FaceKey, not v1.x.
 
 ## Documentation
 
