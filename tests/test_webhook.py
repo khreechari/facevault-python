@@ -1,5 +1,7 @@
 """Tests for webhook signature verification and event parsing."""
 
+from __future__ import annotations  # PEP 563 — makes `str | bytes` annotations parse on Python 3.9
+
 import hashlib
 import hmac
 import json
