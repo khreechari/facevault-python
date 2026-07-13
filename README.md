@@ -4,7 +4,7 @@
 [![Python versions](https://img.shields.io/pypi/pyversions/facevault)](https://pypi.org/project/facevault/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-46%20passed-brightgreen)]()
-[![CI](https://github.com/khreechari/facevault-python/actions/workflows/ci.yml/badge.svg)](https://github.com/khreechari/facevault-python/actions/workflows/ci.yml)
+[![CI](https://github.com/kaditham-technologies/facevault-python/actions/workflows/ci.yml/badge.svg)](https://github.com/kaditham-technologies/facevault-python/actions/workflows/ci.yml)
 
 Python client for the [FaceVault](https://facevault.id) identity verification API — privacy-first KYC with liveness detection, face matching, and document verification.
 

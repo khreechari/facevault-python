@@ -9,7 +9,7 @@ description = "Python SDK for the FaceVault identity verification API"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
-authors = [{ name = "Khreechari" }]
+authors = [{ name = "FaceVault", email = "hello@facevault.id" }]
 keywords = ["kyc", "identity", "verification", "facevault", "liveness", "telegram", "mini-app"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -24,7 +24,7 @@ dependencies = ["httpx>=0.24,<1"]
 [project.urls]
 Homepage = "https://facevault.id"
 Documentation = "https://facevault.id/docs"
-Repository = "https://github.com/khreechari/facevault-python"
+Repository = "https://github.com/kaditham-technologies/facevault-python"
 
 [tool.hatch.version]
 path = "src/facevault/__init__.py"
